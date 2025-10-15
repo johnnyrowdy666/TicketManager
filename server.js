@@ -5,7 +5,8 @@ const session = require('express-session');
 const morgan = require('morgan');
 const methodOverride = require('method-override');
 const mongoose = require('mongoose');
-const { attachUser } = require('./middleware/auth');
+const { attachUser, ensureRole } = require('./middleware/auth');
+const realtime = require('./lib/realtime');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -196,6 +197,19 @@ app.use('/', require('./routes/events'));
 // profile & dashboard
 app.use('/', require('./routes/profile'));
 app.use('/', require('./routes/dashboard'));
+// wallet
+app.use('/', require('./routes/wallet'));
+// orders (ticket details & verify)
+app.use('/', require('./routes/orders'));
+// api for scanning devices
+app.use('/', require('./routes/api'));
+// organizer scan page
+app.use('/', require('./routes/scan'));
+
+// --- Realtime SSE endpoint for organizers ---
+app.get('/realtime/orders', ensureRole('organizer'), (req, res) => {
+  realtime.addClient(res);
+});
 
 app.listen(PORT, () => {
   console.log(`Server running at http://localhost:${PORT}/`);

@@ -26,6 +26,9 @@
             <label for="date" style="font-weight:600">วันที่</label>
             <input id="date" class="tm-input" type="date" name="date" value="<%= (typeof formData !== 'undefined' && formData && formData.date) ? formData.date : (event ? new Date(event.date).toISOString().substring(0,10) : '') %>" required autocomplete="off" />
 
+            <label for="startTime" style="font-weight:600">เวลาเริ่มงาน</label>
+            <input id="startTime" class="tm-input" type="time" name="startTime" value="<%= (typeof formData !== 'undefined' && formData && formData.startTime) ? formData.startTime : (event?.startTime || '') %>" autocomplete="off" />
+
             <label for="locationInput" style="font-weight:600">สถานที่</label>
             <input id="locationInput" class="tm-input" type="text" name="location" value="<%= (typeof formData !== 'undefined' && formData && formData.location) ? formData.location : (event?.location || '') %>" required autocomplete="off" />
             <input type="hidden" name="lat" value="<%= (typeof formData !== 'undefined' && formData && formData.lat) ? formData.lat : (typeof event?.lat !== 'undefined' ? event.lat : '') %>">

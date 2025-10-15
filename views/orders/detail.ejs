@@ -1,0 +1,62 @@
+<%- include('../partials/header', { pageTitle: 'รายละเอียดตั๋ว' }) %>
+  <main class="tm-container tm-stack">
+    <h1 class="tm-h1">รายละเอียดตั๋ว</h1>
+    <section class="tm-card">
+      <div class="tm-card-body tm-stack">
+        <div style="display:flex;flex-wrap:wrap;gap:16px;align-items:flex-start">
+          <div style="flex:1;min-width:260px" class="tm-stack">
+            <h2 class="tm-h3" style="margin-top:0"><%= event?.title || 'Event' %></h2>
+            <div class="tm-grid tm-grid-md-2">
+              <div>
+                <p><strong>คำสั่งซื้อ (Order ID):</strong> <%= order._id %></p>
+                <p><strong>สถานะตั๋ว:</strong>
+                  <% if (order.status === 'used') { %>
+                    <span class="tm-badge tm-badge-danger">ใช้แล้ว</span>
+                    <% if (order.usedAt) { %><span class="tm-muted" style="margin-left:6px">(<%= new Date(order.usedAt).toLocaleString('th-TH') %>)</span><% } %>
+                  <% } else { %>
+                    <span class="tm-badge tm-badge-success">ยังไม่ได้ใช้</span>
+                  <% } %>
+                </p>
+                <p><strong>จำนวนบัตร:</strong> <%= order.quantity %></p>
+                <p><strong>ยอดที่ชำระ:</strong> <%= Number(order.amount || 0).toLocaleString('th-TH') %> ฿</p>
+                <% const pDate = (order.paidAt || order.createdAt) ? new Date(order.paidAt || order.createdAt) : null; const pValid = pDate && !Number.isNaN(pDate.valueOf()); %>
+                <p><strong>วันที่ซื้อ:</strong> <%= pValid ? pDate.toLocaleString('th-TH') : '—' %></p>
+              </div>
+              <div>
+                <% if (event) { %>
+                  <p><strong>วันจัดงาน:</strong> <%= new Date(event.date).toLocaleString('th-TH') %></p>
+                  <p><strong>สถานที่:</strong> <%= event.location %></p>
+                  <% if (event.startTime) { %><p><strong>เวลาเริ่ม:</strong> <%= event.startTime %></p><% } %>
+                  <% if (typeof event.price !== 'undefined') { %><p><strong>ราคาต่อใบ:</strong> <%= Number(event.price).toLocaleString('th-TH') %> ฿</p><% } %>
+                  <%
+                    const baseDt = event && event.date ? new Date(event.date) : null;
+                    const validDt = baseDt && !Number.isNaN(baseDt.valueOf());
+                    let startTs = validDt ? baseDt.valueOf() : null;
+                    if (validDt && event && event.startTime) {
+                      const parts = String(event.startTime).split(':');
+                      const hh = Number(parts[0] || 0);
+                      const mm = Number(parts[1] || 0);
+                      baseDt.setHours(hh, mm, 0, 0);
+                      startTs = baseDt.valueOf();
+                    }
+                  %>
+                  <% if (startTs) { %>
+                    <p><strong>นับถอยหลัง:</strong> <span class="tm-countdown" data-countdown-ts="<%= startTs %>"><span class="countdown-text"></span></span></p>
+                  <% } %>
+                <% } %>
+              </div>
+            </div>
+          </div>
+          <div style="min-width:260px;text-align:center">
+            <img src="<%= qrDataUrl %>" alt="QR สำหรับตรวจตั๋ว" style="width:256px;height:256px;border:1px solid #ddd;border-radius:8px" />
+            <p class="tm-muted" style="font-size:12px;margin-top:8px">สแกน QR เพื่อยืนยันตั๋ว: <%= payloadUrl %></p>
+          </div>
+        </div>
+        <div style="display:flex;gap:8px;margin-top:8px">
+          <a class="tm-btn tm-btn-outline" href="/profile#orders">ย้อนกลับไปหน้าตั๋วของฉัน</a>
+          <a class="tm-btn tm-btn-primary" href="/tickets/<%= order._id %>/verify" target="_blank">เปิดหน้าตรวจตั๋ว</a>
+        </div>
+      </div>
+    </section>
+  </main>
+<%- include('../partials/footer') %>

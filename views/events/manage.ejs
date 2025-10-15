@@ -31,8 +31,13 @@
             />
             <div class="tm-card-body tm-stack">
               <h3 class="tm-h3"><%= e.title %></h3>
-              <p class="tm-muted"><strong>วันที่:</strong> <%= new Date(e.date).toLocaleDateString('th-TH') %> · <strong>สถานที่:</strong> <%= e.location %></p>
+              <p class="tm-muted"><strong>วันที่:</strong> <%= new Date(e.date).toLocaleDateString('th-TH') %> </p>
+              <p class="tm-muted"· <strong>สถานที่:</strong> <%= e.location %></p>
+              <% if (e.startTime) { %>
+              <p class="tm-muted"><strong>เวลาเริ่ม:</strong> <%= e.startTime %> น.</p>
+              <% } %>
               <p class="tm-muted"><strong>ราคา:</strong> <%= e.price === 0 ? 'ฟรี' : e.price + ' ฿' %> · <strong>ขายแล้ว:</strong> <%= e.ticketsSold || 0 %></p>
+            
               <div style="display:flex;flex-wrap:wrap;gap:12px;padding-top:4px">
                 <a class="tm-btn tm-btn-outline" href="/events/<%= e._id %>">
                   <svg class="tm-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/><circle cx="12" cy="12" r="3"/></svg>

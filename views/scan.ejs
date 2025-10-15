@@ -1,0 +1,37 @@
+<%- include('partials/header', { pageTitle: 'สแกนตรวจตั๋ว (Real-time)' }) %>
+  <main class="tm-container tm-stack">
+    <h1 class="tm-h1">สแกนตรวจตั๋ว (Real-time)</h1>
+    <section class="tm-card">
+      <div class="tm-card-body tm-stack">
+        <p class="tm-muted">รองรับการสแกนด้วยกล้อง (มือถือ/แท็บเล็ต) หรือกรอกโค้ดด้วยมือ</p>
+        <div class="tm-grid tm-grid-md-2">
+          <div>
+            <h3 class="tm-h3">สแกนด้วยกล้อง</h3>
+            <div id="camera-area" class="tm-stack">
+              <div id="camera-status" class="tm-notice">กำลังเตรียมกล้อง...</div>
+              <div id="camera" style="width:100%; max-width: 360px; min-height: 240px; background: var(--surface); border: 1px dashed var(--border);"></div>
+            </div>
+          </div>
+          <div>
+            <h3 class="tm-h3">กรอกโค้ดด้วยมือ</h3>
+            <form id="manual-form" class="tm-stack" onsubmit="return false;">
+              <div class="tm-input-group">
+                <input id="manual-code" class="tm-input" type="text" placeholder="กรอก Order ID หรือโค้ด" />
+              </div>
+              <button id="manual-submit" class="tm-btn tm-btn-primary" type="button">ตรวจสอบ</button>
+            </form>
+          </div>
+        </div>
+
+        <div class="tm-stack" style="margin-top:16px">
+          <h3 class="tm-h3">ผลการตรวจสอบล่าสุด</h3>
+          <div id="results" class="tm-stack"></div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- optional QR scanner library -->
+  <script src="https://unpkg.com/html5-qrcode@2.3.8/minified/html5-qrcode.min.js"></script>
+  <script src="/scan.js"></script>
+<%- include('partials/footer') %>

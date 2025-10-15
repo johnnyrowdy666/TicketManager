@@ -1,0 +1,48 @@
+<%- include('../partials/header', { pageTitle: 'ตรวจตั๋ว (แบบจำลอง)' }) %>
+  <main class="tm-container tm-stack">
+    <h1 class="tm-h1">ตรวจตั๋ว (แบบจำลอง)</h1>
+    <section class="tm-card">
+      <div class="tm-card-body tm-stack">
+        <div class="tm-stack">
+          <p><strong>สถานะ:</strong>
+            <% if (order.status === 'used') { %>
+              <span class="tm-badge tm-badge-danger">ใช้แล้ว</span>
+              <% if (order.usedAt) { %><span class="tm-muted" style="margin-left:6px">(<%= new Date(order.usedAt).toLocaleString('th-TH') %>)</span><% } %>
+            <% } else { %>
+              <span class="tm-badge tm-badge-success">ยังไม่ได้ใช้</span>
+            <% } %>
+          </p>
+          <p><strong>คำสั่งซื้อ:</strong> <%= order._id %></p>
+          <% if (event) { %>
+            <p><strong>งาน:</strong> <%= event.title %></p>
+            <p><strong>วันเวลา:</strong> <%= new Date(event.date).toLocaleString('th-TH') %> <% if (event.startTime) { %>· <%= event.startTime %><% } %></p>
+            <p><strong>สถานที่:</strong> <%= event.location %></p>
+            <%
+              const baseDt = event && event.date ? new Date(event.date) : null;
+              const validDt = baseDt && !Number.isNaN(baseDt.valueOf());
+              let startTs = validDt ? baseDt.valueOf() : null;
+              if (validDt && event && event.startTime) {
+                const parts = String(event.startTime).split(':');
+                const hh = Number(parts[0] || 0);
+                const mm = Number(parts[1] || 0);
+                baseDt.setHours(hh, mm, 0, 0);
+                startTs = baseDt.valueOf();
+              }
+            %>
+            <% if (startTs) { %>
+              <p><strong>นับถอยหลัง:</strong> <span class="tm-countdown" data-countdown-ts="<%= startTs %>"><span class="countdown-text"></span></span></p>
+            <% } %>
+          <% } %>
+          <p class="tm-muted">หมายเหตุ: หน้านี้เปิดให้เข้าถึงสาธารณะเพื่อการตรวจตั๋วเท่านั้น ไม่แสดงข้อมูลส่วนตัวของผู้ถือบัตร</p>
+        </div>
+        <form method="POST" action="/tickets/<%= order._id %>/use" style="margin-top:12px">
+          <button class="tm-btn tm-btn-primary" type="submit" <% if (order.status === 'used') { %>disabled<% } %>>ทำเครื่องหมายว่าใช้แล้ว</button>
+          <span class="tm-muted" style="margin-left:8px">(สำหรับ Organizer เท่านั้น)</span>
+        </form>
+        <div style="margin-top:12px">
+          <a class="tm-btn tm-btn-outline" href="/">กลับหน้าแรก</a>
+        </div>
+      </div>
+    </section>
+  </main>
+<%- include('../partials/footer') %>

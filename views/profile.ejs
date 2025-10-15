@@ -1,36 +1,83 @@
 <%- include('./partials/header', { pageTitle: 'โปรไฟล์ของฉัน' }) %>
     <main class="tm-container tm-stack">
-      <h1 class="tm-h1">โปรไฟล์ของฉัน</h1>
-      <section class="tm-card">
-        <div class="tm-card-body tm-stack">
-          <p><strong>ชื่อ:</strong> <%= currentUser.name %></p>
-          <p><strong>อีเมล:</strong> <%= currentUser.email %></p>
-          <p><strong>บทบาท:</strong> <%= currentUser.role %></p>
-          <% if (currentUser.role === 'attendee') { %>
-            <form class="form" action="/profile" method="post" style="display:flex;gap:12px;flex-wrap:wrap;align-items:center">
-              <label>แก้ไขชื่อ <input type="text" name="name" value="<%= currentUser.name %>" required autocomplete="name" class="tm-input" /></label>
-  <button class="tm-btn tm-btn-primary" type="submit">บันทึก</button>
-            </form>
-          <% } else { %>
-            <p class="notice">สำหรับ Organizer ไม่รองรับการแก้ไขโปรไฟล์ในระบบนี้</p>
-          <% } %>
-        </div>
-      </section>
+      <header class="tm-stack" style="gap:8px">
+        <h1 class="tm-h1">โปรไฟล์ของฉัน</h1>
+        <p class="tm-muted">จัดระเบียบข้อมูลส่วนตัวและดูบัตรที่เคยซื้อได้อย่างชัดเจน</p>
+      </header>
 
-      <h2 class="tm-h3">ประวัติการซื้อบัตร</h2>
-      <div class="tm-grid tm-grid-md-2 tm-grid-lg-3">
-        <% if (orders.length === 0) { %>
-          <p class="notice">ยังไม่มีคำสั่งซื้อ</p>
-        <% } %>
-        <% orders.forEach(o => { %>
-          <article class="tm-card">
-            <div class="tm-card-body tm-stack" style="font-size:14px">
-              <h3 class="tm-h3"><%= o.event?.title || 'Event' %></h3>
-              <p><strong>จำนวน:</strong> <%= o.quantity %> · <strong>ยอดชำระ:</strong> <%= o.amount %> ฿</p>
-              <p><strong>วันที่ซื้อ:</strong> <%= new Date(o.paidAt || o.createdAt).toLocaleString('th-TH') %></p>
+      <div class="tm-grid tm-grid-md-2" style="align-items:start">
+        <!-- ข้อมูลโปรไฟล์ -->
+        <section class="tm-card">
+          <div class="tm-card-body tm-stack">
+            <div style="display:flex;align-items:center;gap:12px">
+              <span class="tm-avatar"><%= (currentUser.name || 'U').trim().charAt(0).toUpperCase() %></span>
+              <div>
+                <p class="tm-h3" style="margin:0"><%= currentUser.name %></p>
+                <p class="tm-muted" style="margin:0"><%= currentUser.email %></p>
+              </div>
             </div>
-          </article>
-        <% }) %>
+            <div style="display:flex;gap:12px;flex-wrap:wrap">
+              <a class="tm-btn tm-btn-primary" href="/settings/profile">แก้ไขข้อมูลส่วนตัว</a>
+              <a class="tm-btn tm-btn-outline" href="/settings/security">เปลี่ยนรหัสผ่าน</a>
+            </div>
+            <p class="tm-muted">บทบาท: <strong><%= currentUser.role %></strong></p>
+          </div>
+        </section>
+
+        <!-- ตั๋วของฉัน -->
+        <section class="tm-card" id="orders">
+          <div class="tm-card-body tm-stack">
+            <h2 class="tm-h3" style="margin-top:0">ตั๋วของฉัน</h2>
+            <% if (orders.length === 0) { %>
+              <p class="notice">ยังไม่มีคำสั่งซื้อ</p>
+            <% } %>
+            <div class="tm-stack">
+              <% orders.forEach(o => { %>
+                <article class="tm-card" style="margin:0">
+                  <div class="tm-card-body tm-stack" style="font-size:14px">
+                    <h3 class="tm-h3"><%= o.event?.title || 'Event' %></h3>
+                    <p><strong>จำนวน:</strong> <%= Number(o.quantity || 1) %> · <strong>ยอดชำระ:</strong> <%= Number(o.amount || 0).toLocaleString('th-TH') %> ฿</p>
+                    <% const purchaseDate = (o.paidAt || o.createdAt) ? new Date(o.paidAt || o.createdAt) : null; const purchaseValid = purchaseDate && !Number.isNaN(purchaseDate.valueOf()); %>
+                    <p><strong>วันที่ซื้อ:</strong> <%= purchaseValid ? purchaseDate.toLocaleString('th-TH') : '—' %></p>
+                    <p><strong>สถานที่:</strong> <%= o.event?.location || 'กรุณาระบุสถานที่' %></p>
+                    <% const evDate = o.event?.date ? new Date(o.event.date) : null; const evDateValid = evDate && !Number.isNaN(evDate.valueOf()); %>
+                    <p><strong>เวลา:</strong> <%= o.event?.startTime || 'กรุณาระบุเวลา' %></p>
+                    <p><strong>วัน:</strong> <%= evDateValid ? evDate.toLocaleDateString('th-TH') : 'กรุณาระบุวัน' %></p>
+                    <%
+                      const startBase = o.event?.date ? new Date(o.event.date) : null;
+                      const startValid = startBase && !Number.isNaN(startBase.valueOf());
+                      let startTs = startValid ? startBase.valueOf() : null;
+                      if (startValid && o.event?.startTime) {
+                        const parts = String(o.event.startTime).split(':');
+                        const hh = Number(parts[0] || 0);
+                        const mm = Number(parts[1] || 0);
+                        startBase.setHours(hh, mm, 0, 0);
+                        startTs = startBase.valueOf();
+                      }
+                    %>
+                    <% if (startTs) { %>
+                      <div class="tm-countdown" data-countdown-ts="<%= startTs %>">
+                        <span class="tm-badge tm-badge-primary">เหลือเวลา</span>
+                        <span class="countdown-text"></span>
+                      </div>
+                    <% } %>
+                    <p><strong>สถานะตั๋ว:</strong>
+                      <% if (o.status === 'used') { %>
+                        <span class="tm-badge tm-badge-danger">ใช้แล้ว</span>
+                        <% if (o.usedAt) { %><span class="tm-muted" style="margin-left:6px">(<%= new Date(o.usedAt).toLocaleString('th-TH') %>)</span><% } %>
+                      <% } else { %>
+                        <span class="tm-badge tm-badge-success">ยังไม่ได้ใช้</span>
+                      <% } %>
+                    </p>
+                    <div>
+                      <a class="tm-btn tm-btn-primary" href="/orders/<%= o._id %>">ดูรายละเอียดตั๋ว</a>
+                    </div>
+                  </div>
+                </article>
+              <% }) %>
+            </div>
+          </div>
+        </section>
       </div>
     </main>
 <%- include('./partials/footer') %>

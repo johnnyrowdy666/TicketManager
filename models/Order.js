@@ -6,6 +6,8 @@ const OrderSchema = new mongoose.Schema(
     eventId: { type: mongoose.Schema.Types.ObjectId, ref: 'Event', required: true },
     quantity: { type: Number, default: 1, min: 1 },
     amount: { type: Number, required: true, min: 0 },
+    status: { type: String, enum: ['unused', 'used'], default: 'unused' },
+    usedAt: { type: Date },
     paidAt: { type: Date, default: Date.now },
   },
   { timestamps: true }

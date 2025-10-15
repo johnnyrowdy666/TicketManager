@@ -1,0 +1,23 @@
+<%- include('../partials/header', { pageTitle: 'แก้ไขข้อมูลส่วนตัว' }) %>
+  <main class="tm-container tm-stack">
+    <h1 class="tm-h1">แก้ไขข้อมูลส่วนตัว</h1>
+    <section class="tm-card">
+      <div class="tm-card-body tm-stack">
+        <form action="/settings/profile" method="post" class="tm-stack" style="gap:12px;max-width:520px">
+          <label class="tm-stack">
+            <span>ชื่อ</span>
+            <input class="tm-input" type="text" name="name" value="<%= (formData && formData.name) || currentUser.name %>" required autocomplete="name" />
+          </label>
+          <label class="tm-stack">
+            <span>อีเมล (ไม่สามารถแก้ไขได้)</span>
+            <input class="tm-input" type="email" value="<%= currentUser.email %>" disabled />
+          </label>
+          <div style="display:flex;gap:12px;flex-wrap:wrap">
+            <button class="tm-btn tm-btn-primary" type="submit">บันทึกการเปลี่ยนแปลง</button>
+            <a class="tm-btn tm-btn-outline" href="/profile">ย้อนกลับไปหน้าโปรไฟล์</a>
+          </div>
+        </form>
+      </div>
+    </section>
+  </main>
+<%- include('../partials/footer') %>

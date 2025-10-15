@@ -9,6 +9,7 @@ const EventSchema = new mongoose.Schema(
     imagePublicId: { type: String },
     lat: { type: Number },
     lng: { type: Number },
+    startTime: { type: String },
     date: { type: Date, required: true },
     location: { type: String, required: true },
     capacity: { type: Number, required: true, min: 0 },

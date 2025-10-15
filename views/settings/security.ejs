@@ -1,0 +1,27 @@
+<%- include('../partials/header', { pageTitle: 'เปลี่ยนรหัสผ่าน' }) %>
+  <main class="tm-container tm-stack">
+    <h1 class="tm-h1">เปลี่ยนรหัสผ่าน</h1>
+    <section class="tm-card">
+      <div class="tm-card-body tm-stack">
+        <form action="/settings/security" method="post" class="tm-stack" style="gap:12px;max-width:520px">
+          <label class="tm-stack">
+            <span>รหัสผ่านปัจจุบัน</span>
+            <input class="tm-input" type="password" name="currentPassword" required autocomplete="current-password" />
+          </label>
+          <label class="tm-stack">
+            <span>รหัสผ่านใหม่</span>
+            <input class="tm-input" type="password" name="newPassword" required minlength="6" autocomplete="new-password" />
+          </label>
+          <label class="tm-stack">
+            <span>ยืนยันรหัสผ่านใหม่</span>
+            <input class="tm-input" type="password" name="confirmPassword" required minlength="6" autocomplete="new-password" />
+          </label>
+          <div style="display:flex;gap:12px;flex-wrap:wrap">
+            <button class="tm-btn tm-btn-primary" type="submit">บันทึกรหัสผ่านใหม่</button>
+            <a class="tm-btn tm-btn-outline" href="/profile">ย้อนกลับไปหน้าโปรไฟล์</a>
+          </div>
+        </form>
+      </div>
+    </section>
+  </main>
+<%- include('../partials/footer') %>

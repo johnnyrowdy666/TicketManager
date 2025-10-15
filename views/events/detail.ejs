@@ -23,6 +23,12 @@
               <svg class="tm-icon-sm" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="color:var(--primary)"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
               <span><strong>วันที่:</strong> <%= new Date(event.date).toLocaleDateString('th-TH', { year:'numeric', month:'long', day:'numeric' }) %></span>
             </div>
+            <% if (event.startTime) { %>
+            <div style="display:flex;align-items:center;gap:8px">
+              <svg class="tm-icon-sm" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="color:#10b981"><circle cx="12" cy="12" r="10"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 7v5l3 3"/></svg>
+              <span><strong>เวลาเริ่ม:</strong> <%= event.startTime %> น.</span>
+            </div>
+            <% } %>
             <div style="display:flex;align-items:center;gap:8px">
               <svg class="tm-icon-sm" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="color:#f59e0b"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
               <span><strong>สถานที่:</strong> <%= event.location %></span>
@@ -31,6 +37,26 @@
               <svg class="tm-icon-sm" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="color:var(--success)"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-3.314 0-6 2.239-6 5s2.686 5 6 5 6-2.239 6-5-2.686-5-6-5z"></path></svg>
               <span><strong>ราคา:</strong> <%= event.price === 0 ? 'ฟรี' : event.price + ' ฿' %> · <strong>จำนวนบัตรทั้งหมด:</strong> <%= event.capacity %> · <strong>ขายแล้ว:</strong> <%= event.ticketsSold || 0 %></span>
             </div>
+            <%
+              const baseDt = event && event.date ? new Date(event.date) : null;
+              const validDt = baseDt && !Number.isNaN(baseDt.valueOf());
+              let startTs = validDt ? baseDt.valueOf() : null;
+              if (validDt && event && event.startTime) {
+                const parts = String(event.startTime).split(':');
+                const hh = Number(parts[0] || 0);
+                const mm = Number(parts[1] || 0);
+                baseDt.setHours(hh, mm, 0, 0);
+                startTs = baseDt.valueOf();
+              }
+            %>
+            <% if (startTs) { %>
+            <div class="tm-stack" style="margin:8px 0">
+              <div class="tm-countdown" data-countdown-ts="<%= startTs %>">
+                <span class="tm-badge tm-badge-primary">นับถอยหลังสู่วันงาน</span>
+                <span class="countdown-text" style="font-weight:600"></span>
+              </div>
+            </div>
+            <% } %>
           </div>
           <% const hasCoords = typeof event.lat !== 'undefined' && typeof event.lng !== 'undefined'; %>
           <p>
