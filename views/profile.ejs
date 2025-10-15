@@ -1,0 +1,36 @@
+<%- include('./partials/header', { pageTitle: 'โปรไฟล์ของฉัน' }) %>
+    <main class="tm-container tm-stack">
+      <h1 class="tm-h1">โปรไฟล์ของฉัน</h1>
+      <section class="tm-card">
+        <div class="tm-card-body tm-stack">
+          <p><strong>ชื่อ:</strong> <%= currentUser.name %></p>
+          <p><strong>อีเมล:</strong> <%= currentUser.email %></p>
+          <p><strong>บทบาท:</strong> <%= currentUser.role %></p>
+          <% if (currentUser.role === 'attendee') { %>
+            <form class="form" action="/profile" method="post" style="display:flex;gap:12px;flex-wrap:wrap;align-items:center">
+              <label>แก้ไขชื่อ <input type="text" name="name" value="<%= currentUser.name %>" required autocomplete="name" class="tm-input" /></label>
+  <button class="tm-btn tm-btn-primary" type="submit">บันทึก</button>
+            </form>
+          <% } else { %>
+            <p class="notice">สำหรับ Organizer ไม่รองรับการแก้ไขโปรไฟล์ในระบบนี้</p>
+          <% } %>
+        </div>
+      </section>
+
+      <h2 class="tm-h3">ประวัติการซื้อบัตร</h2>
+      <div class="tm-grid tm-grid-md-2 tm-grid-lg-3">
+        <% if (orders.length === 0) { %>
+          <p class="notice">ยังไม่มีคำสั่งซื้อ</p>
+        <% } %>
+        <% orders.forEach(o => { %>
+          <article class="tm-card">
+            <div class="tm-card-body tm-stack" style="font-size:14px">
+              <h3 class="tm-h3"><%= o.event?.title || 'Event' %></h3>
+              <p><strong>จำนวน:</strong> <%= o.quantity %> · <strong>ยอดชำระ:</strong> <%= o.amount %> ฿</p>
+              <p><strong>วันที่ซื้อ:</strong> <%= new Date(o.paidAt || o.createdAt).toLocaleString('th-TH') %></p>
+            </div>
+          </article>
+        <% }) %>
+      </div>
+    </main>
+<%- include('./partials/footer') %>

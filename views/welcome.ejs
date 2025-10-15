@@ -1,0 +1,102 @@
+<%- include('./partials/header', { pageTitle: 'ยินดีต้อนรับ' }) %>
+    <!-- Toast Container -->
+    <%- include('./partials/toast') %>
+    
+    <main class="tm-container tm-stack">
+      <!-- Hero Section -->
+      <section class="tm-card tm-hero">
+        <div class="tm-card-body tm-stack tm-center">
+          <div class="space-y-4">
+            <h1 class="tm-display">
+              ยินดีต้อนรับสู่ 
+              <span style="color:var(--primary)">TicketManager</span>
+            </h1>
+            <p class="tm-muted" style="font-size:18px;max-width:720px;margin:0 auto">
+              แพลตฟอร์มสำหรับค้นหา สร้าง และจัดการอีเวนต์ 
+              <br class="hidden md:block">
+              พร้อมซื้อบัตรได้ง่ายและปลอดภัย
+            </p>
+          </div>
+          
+          <div style="display:flex;flex-wrap:wrap;gap:16px;justify-content:center;align-items:center;padding-top:8px">
+            <a class="tm-btn tm-btn-primary" href="/login">
+              <svg class="tm-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"></path>
+              </svg>
+              เข้าสู่ระบบ
+            </a>
+            <a class="tm-btn tm-btn-outline" href="/register">
+              <svg class="tm-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"></path>
+              </svg>
+              สมัครสมาชิก
+            </a>
+        
+          </div>
+        </div>
+      </section>
+
+      <!-- Features Section -->
+      <section class="tm-stack">
+        <div class="tm-center tm-stack">
+          <h2 class="tm-h1">ทำไมต้องเลือก TicketManager?</h2>
+          <p class="tm-muted" style="font-size:18px">เพราะเราเข้าใจความต้องการของทั้งผู้จัดงานและผู้เข้าร่วม</p>
+        </div>
+        
+        <div class="tm-grid tm-grid-md-2 tm-grid-lg-3">
+          <article class="tm-card">
+            <div class="tm-card-body tm-stack tm-center">
+              <div class="tm-circle" style="background:#dbeafe">
+                <svg class="tm-icon-lg" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="color:var(--primary)">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                </svg>
+              </div>
+              <h3 class="tm-h3">สำหรับผู้เข้าร่วม</h3>
+              <p class="tm-muted">ค้นหาอีเวนต์ตามความสนใจ ดูรายละเอียดครบถ้วน และซื้อบัตรได้ทันทีด้วยระบบที่ปลอดภัย</p>
+            </div>
+          </article>
+          
+          <article class="tm-card">
+            <div class="tm-card-body tm-stack tm-center">
+              <div class="tm-circle" style="background:#ffedd5">
+                <svg class="tm-icon-lg" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="color:#ea580c">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path>
+                </svg>
+              </div>
+              <h3 class="tm-h3">สำหรับผู้จัดงาน</h3>
+              <p class="tm-muted">สร้างอีเวนต์ จัดการรูปภาพ แผนที่ จำนวนบัตร และติดตามยอดขายแบบเรียลไทม์</p>
+            </div>
+          </article>
+          
+          <article class="tm-card">
+            <div class="tm-card-body tm-stack tm-center">
+              <div class="tm-circle" style="background:#dcfce7">
+                <svg class="tm-icon-lg" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="color:var(--success)">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
+                </svg>
+              </div>
+              <h3 class="tm-h3">ใช้งานง่าย ปลอดภัย</h3>
+              <p class="tm-muted">รองรับทุกอุปกรณ์ มีแผนที่ Google Maps และระบบรักษาความปลอดภัยระดับสูง</p>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <!-- CTA Section -->
+      <section class="tm-card tm-cta">
+        <div class="tm-card-body tm-center tm-stack">
+          <h2 class="tm-display">พร้อมเริ่มต้นแล้วหรือยัง?</h2>
+          <p style="color:#bfdbfe;font-size:18px">เข้าร่วมกับเราวันนี้และสัมผัสประสบการณ์การจัดการอีเวนต์ที่ดีที่สุด</p>
+          <div style="display:flex;flex-wrap:wrap;gap:16px;justify-content:center;padding-top:8px">
+            <a class="tm-btn tm-btn-outline" style="background:#fff;color:var(--primary)" href="/register">
+              <svg class="tm-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+              </svg>
+              เริ่มต้นฟรี
+            </a>
+          
+          </div>
+        </div>
+      </section>
+    </main>
+<%- include('./partials/footer') %>

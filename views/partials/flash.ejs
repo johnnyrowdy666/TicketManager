@@ -1,0 +1,6 @@
+<% if (flash) { %>
+  <div class="notice <%= flash.type %> text-sm p-3 rounded-md"
+       role="status" aria-live="polite">
+    <%= flash.message %>
+  </div>
+<% } %>

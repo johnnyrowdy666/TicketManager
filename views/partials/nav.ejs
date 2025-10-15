@@ -1,0 +1,44 @@
+<header class="tm-nav">
+  <div class="tm-container tm-nav-inner">
+    <div style="display:flex;align-items:center;gap:8px">
+      <button id="tm-nav-toggle" class="tm-nav-toggle" type="button" aria-label="เปิดเมนู" aria-expanded="false" aria-controls="tm-nav-menu">
+        <svg class="tm-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18"/><path d="M3 12h18"/><path d="M3 18h18"/></svg>
+      </button>
+      <a class="tm-brand" href="/">Event Ticketing</a>
+    </div>
+    <form action="/" method="get" class="tm-search">
+      <input class="tm-input" type="text" name="q" value="<%= typeof q !== 'undefined' ? q : '' %>" placeholder="ค้นหาอีเวนต์..." autocomplete="off">
+      <button class="tm-btn tm-btn-primary" type="submit">
+        <svg class="tm-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+        ค้นหา
+      </button>
+    </form>
+    <nav id="tm-nav-menu" class="tm-nav-menu">
+      <% if (currentUser) { %>
+        <span class="tm-muted">สวัสดี, <%= currentUser.name %></span>
+        <a class="tm-link" href="/profile">โปรไฟล์</a>
+        <% if (currentUser.role === 'organizer') { %>
+          <a class="tm-link" href="/events/manage">จัดการอีเวนต์</a>
+          <a class="tm-link" href="/dashboard">Dashboard</a>
+        <% } %>
+        <form action="/logout" method="post" style="display:inline">
+          <button class="tm-link" type="submit">ออกจากระบบ</button>
+        </form>
+      <% } else { %>
+        <a class="tm-btn tm-btn-primary" href="/login">เข้าสู่ระบบ</a>
+        <a class="tm-btn tm-btn-outline" href="/register">สมัครสมาชิก</a>
+      <% } %>
+    </nav>
+  </div>
+  <script>
+    document.addEventListener('DOMContentLoaded', function(){
+      var btn = document.getElementById('tm-nav-toggle');
+      var menu = document.getElementById('tm-nav-menu');
+      if(!btn || !menu) return;
+      btn.addEventListener('click', function(){
+        var opened = menu.classList.toggle('open');
+        btn.setAttribute('aria-expanded', opened ? 'true' : 'false');
+      });
+    });
+  </script>
+</header>

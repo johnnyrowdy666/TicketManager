@@ -1,0 +1,104 @@
+<%- include('../partials/header', { pageTitle: event.title }) %>
+    <main class="tm-container tm-stack">
+      <% const remaining = Number(event.capacity) - Number(event.ticketsSold || 0); %>
+      <article class="tm-card tm-hero tm-stack">
+        <img
+          src="<%= coverUrl(event, 1200, 600) %>"
+          alt="<%= event.title %>"
+          width="1200" height="600"
+          decoding="async"
+          fetchpriority="high"
+          referrerpolicy="no-referrer"
+          onerror="this.src='/placeholder.svg';this.onerror=null"
+          <% if (isCloudinaryImage(event)) { %>
+            srcset="<%= coverSrcset(event) %>"
+            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 90vw, 1200px"
+          <% } %>
+        />
+        <div class="tm-card-body tm-stack" style="line-height:1.6">
+          <h1 class="tm-h1"><%= event.title %></h1>
+          <p class="tm-muted"><%= event.description %></p>
+          <div class="tm-stack" style="font-size:14px;color:var(--text)">
+            <div style="display:flex;align-items:center;gap:8px">
+              <svg class="tm-icon-sm" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="color:var(--primary)"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+              <span><strong>วันที่:</strong> <%= new Date(event.date).toLocaleDateString('th-TH', { year:'numeric', month:'long', day:'numeric' }) %></span>
+            </div>
+            <div style="display:flex;align-items:center;gap:8px">
+              <svg class="tm-icon-sm" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="color:#f59e0b"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+              <span><strong>สถานที่:</strong> <%= event.location %></span>
+            </div>
+            <div style="display:flex;align-items:center;gap:8px">
+              <svg class="tm-icon-sm" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="color:var(--success)"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-3.314 0-6 2.239-6 5s2.686 5 6 5 6-2.239 6-5-2.686-5-6-5z"></path></svg>
+              <span><strong>ราคา:</strong> <%= event.price === 0 ? 'ฟรี' : event.price + ' ฿' %> · <strong>จำนวนบัตรทั้งหมด:</strong> <%= event.capacity %> · <strong>ขายแล้ว:</strong> <%= event.ticketsSold || 0 %></span>
+            </div>
+          </div>
+          <% const hasCoords = typeof event.lat !== 'undefined' && typeof event.lng !== 'undefined'; %>
+          <p>
+            <a class="tm-btn tm-btn-outline" target="_blank" rel="noopener" href="<%= hasCoords ? ('https://www.google.com/maps/search/?api=1&query=' + event.lat + ',' + event.lng) : ('https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(event.location)) %>">
+              <svg class="tm-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-6-5.33-6-10a6 6 0 1112 0c0 4.67-6 10-6 10z"/><circle cx="12" cy="11" r="2"/></svg>
+              เปิดใน Google Maps
+            </a>
+          </p>
+          <% if (hasCoords && typeof mapsApiKey !== 'undefined' && mapsApiKey) { %>
+            <div id="event-map" style="height:300px;border:1px solid #ddd;margin:8px 0"></div>
+            <script src="https://maps.googleapis.com/maps/api/js?key=<%= mapsApiKey %>"></script>
+            <script>
+              (function(){
+                const pos = { lat: Number(<%= event.lat %>), lng: Number(<%= event.lng %>) };
+                const map = new google.maps.Map(document.getElementById('event-map'), { center: pos, zoom: 14 });
+                new google.maps.Marker({ position: pos, map });
+              })();
+            </script>
+          <% } %>
+          <% if (remaining <= 0) { %>
+            <script>window.showToast('บัตรหมดแล้ว (Sold Out)','warning');</script>
+          <% } else if (currentUser && currentUser.role === 'attendee') { %>
+            <form action="/events/<%= event._id %>/buy" method="post" class="tm-stack">
+              <label class="tm-field">จำนวนที่ต้องการซื้อ
+                <input type="number" name="quantity" min="1" max="<%= remaining %>" value="1" required class="tm-input" />
+              </label>
+              <p id="totalPrice" class="tm-muted" style="font-size:14px" aria-live="polite"></p>
+              <button class="tm-btn tm-btn-primary" type="submit">
+                <svg class="tm-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 9v6a2 2 0 002 2h10a2 2 0 002-2v-1a2 2 0 000-4v-1a2 2 0 00-2-2H5a2 2 0 00-2 2z"/><path d="M8 9v6"/><path d="M12 9v6"/></svg>
+                ซื้อบัตร
+              </button>
+              <script>
+                (function(){
+                  var form = document.querySelector('form[action="/events/<%= event._id %>/buy"]');
+                  if (!form) return;
+                  var qtyInput = form.querySelector('input[name="quantity"]');
+                  var totalEl = document.getElementById('totalPrice');
+                  var btn = form.querySelector('button[type="submit"]');
+                  var price = Number(<%= Number(event.price) %>);
+                  var remaining = Number(<%= remaining %>);
+                  function update(){
+                    var qty = Number(qtyInput.value || 0);
+                    var valid = qty >= 1 && qty <= remaining;
+                    btn.disabled = !valid;
+                    btn.classList.toggle('tm-btn-disabled', !valid);
+                    if (price > 0) {
+                      var total = qty * price;
+                      totalEl.textContent = 'ยอดรวม: ' + total.toLocaleString('th-TH') + ' ฿';
+                    } else {
+                      totalEl.textContent = 'ฟรี';
+                    }
+                  }
+                  if (qtyInput && btn && totalEl) {
+                    qtyInput.addEventListener('input', update);
+                    update();
+                  }
+                })();
+              </script>
+            </form>
+          <% } else if (!currentUser) { %>
+            <p><a class="tm-btn tm-btn-outline" href="/login">
+              <svg class="tm-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 3h4a2 2 0 012 2v14a2 2 0 01-2 2h-4"/><path d="M10 17l-5-5 5-5"/><path d="M13 12H5"/></svg>
+              เข้าสู่ระบบเพื่อซื้อบัตร
+            </a></p>
+          <% } else { %>
+            <p class="tm-muted">เฉพาะผู้เข้าร่วม (Attendee) เท่านั้นที่สามารถซื้อบัตรได้</p>
+          <% } %>
+        </div>
+      </article>
+    </main>
+<%- include('../partials/footer') %>

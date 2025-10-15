@@ -1,0 +1,162 @@
+<%- include('./partials/header', { pageTitle: 'Event Ticketing' }) %>
+    
+    <main class="tm-container tm-stack">
+      <!-- Header Section -->
+      <div class="tm-row">
+        <div>
+          <h1 class="tm-h1">รายการอีเวนต์</h1>
+          <% if (q) { %>
+            <p class="tm-muted">ผลการค้นหา: "<span style="color:var(--primary); font-weight:600"><%= q %></span>"</p>
+          <% } else { %>
+            <p class="tm-muted">ค้นพบอีเวนต์ที่น่าสนใจสำหรับคุณ</p>
+          <% } %>
+        </div>
+        
+        <!-- Quick Actions -->
+        <div style="display:flex;gap:12px">
+          <% if (currentUser && currentUser.role === 'organizer') { %>
+            <a class="tm-btn tm-btn-primary" href="/events/new">
+              <svg class="tm-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+              </svg>
+              สร้างอีเวนต์ใหม่
+            </a>
+          <% } %>
+          <button class="tm-btn tm-btn-outline" onclick="toggleFilters()">
+            <svg class="tm-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.207A1 1 0 013 6.5V4z"></path>
+            </svg>
+            ตัวกรอง
+          </button>
+        </div>
+      </div>
+
+      <!-- Events Grid -->
+      <% if (events.length > 0) { %>
+        <div class="tm-grid tm-grid-md-2 tm-grid-lg-3">
+          <% events.forEach(e => { %>
+            <article class="tm-card" style="overflow:hidden;">
+              <!-- Event Image -->
+              <div style="position:relative; overflow:hidden;">
+                <img src="<%= thumbUrl(e, 480, 270) %>" alt="<%= e.title %>" loading="lazy" width="480" height="270" decoding="async" referrerpolicy="no-referrer" onerror="this.src='/placeholder.svg';this.onerror=null"
+                  <% if (isCloudinaryImage(e)) { %>
+                    srcset="<%= thumbSrcset(e) %>"
+                    sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                  <% } %>
+                />
+                <!-- Price Badge -->
+                <div style="position:absolute; top:12px; right:12px;">
+                  <span class="tm-badge <%= e.price === 0 ? 'tm-badge-success' : 'tm-badge-primary' %>">
+                    <%= e.price === 0 ? 'ฟรี' : e.price + ' ฿' %>
+                  </span>
+                </div>
+                <!-- Status Badge -->
+                <% if (e.status === 'sold_out') { %>
+                  <div style="position:absolute; top:12px; left:12px;">
+                    <span class="tm-badge tm-badge-danger">
+                      หมดแล้ว
+                    </span>
+                  </div>
+                <% } %>
+              </div>
+              
+              <!-- Event Content -->
+              <div class="tm-card-body tm-stack">
+                <div class="tm-stack">
+                  <h3 class="tm-h3" style="display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;">
+                    <a href="/events/<%= e._id %>" style="color:var(--text); text-decoration:none;"><%= e.title %></a>
+                  </h3>
+                  <p class="tm-muted" style="display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;"><%= e.description %></p>
+                </div>
+                
+                <!-- Event Details -->
+                <div class="tm-stack" style="font-size:14px">
+                  <div style="display:flex;align-items:center;gap:8px;color:var(--text)">
+                    <svg class="tm-icon-sm" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="color:var(--primary)">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                    </svg>
+                    <span><%= new Date(e.date).toLocaleDateString('th-TH', { 
+                      year: 'numeric', 
+                      month: 'long', 
+                      day: 'numeric',
+                      weekday: 'short'
+                    }) %></span>
+                  </div>
+                  <div style="display:flex;align-items:center;gap:8px;color:var(--text)">
+                    <svg class="tm-icon-sm" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="color:#f59e0b">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                    </svg>
+                    <span style="display:-webkit-box;-webkit-line-clamp:1;-webkit-box-orient:vertical;overflow:hidden;"><%= e.location %></span>
+                  </div>
+                </div>
+                
+                <!-- Action Button -->
+                <div>
+                  <% if (e.status === 'sold_out') { %>
+                    <button class="tm-btn tm-btn-disabled" style="width:100%" disabled>
+                      <svg class="tm-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                      </svg>
+                      หมดแล้ว
+                    </button>
+                  <% } else { %>
+                    <a class="tm-btn tm-btn-primary" style="width:100%" href="/events/<%= e._id %>">
+                      <svg class="tm-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                      </svg>
+                      ดูรายละเอียด
+                    </a>
+                  <% } %>
+                </div>
+              </div>
+            </article>
+          <% }) %>
+        </div>
+      <% } else { %>
+        <!-- Empty State -->
+        <div class="tm-empty">
+          <div class="tm-empty-icon">
+            <svg class="tm-icon-lg" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="color:#94a3b8">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+            </svg>
+          </div>
+          <h3 class="tm-h3" style="margin-bottom:8px">ไม่พบอีเวนต์</h3>
+          <p class="tm-muted" style="margin-bottom:16px">
+            <% if (q) { %>
+              ไม่พบอีเวนต์ที่ตรงกับคำค้นหา "<%= q %>"
+            <% } else { %>
+              ยังไม่มีอีเวนต์ในระบบ
+            <% } %>
+          </p>
+          <% if (currentUser && currentUser.role === 'organizer') { %>
+            <a class="tm-btn tm-btn-primary" href="/events/form">
+              <svg class="tm-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+              </svg>
+              สร้างอีเวนต์แรก
+            </a>
+          <% } %>
+        </div>
+      <% } %>
+
+      <!-- Database Status -->
+      <% if (!dbConnected) { %>
+        <script>
+          document.addEventListener('DOMContentLoaded', function() {
+            window.showToast('กำลังทำงานแบบตัวอย่างด้วยหน่วยความจำ (ยังไม่ได้เชื่อม MongoDB)', 'info');
+          });
+        </script>
+      <% } %>
+    </main>
+
+    <!-- Filter Toggle Script -->
+    <script>
+      function toggleFilters() {
+        // Placeholder for filter functionality
+        window.showToast('ฟีเจอร์ตัวกรองจะเพิ่มในอนาคต', 'info');
+      }
+    </script>
+
+<%- include('./partials/footer') %>

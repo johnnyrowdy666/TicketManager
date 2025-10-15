@@ -1,0 +1,69 @@
+<%- include('./partials/header', { pageTitle: 'Dashboard' }) %>
+    <main class="tm-container tm-stack">
+      <h1 class="tm-h1">Dashboard (รายชื่อผู้ซื้อบัตร)</h1>
+      <% rows.forEach(row => { %>
+        <section class="tm-card">
+          <div class="tm-card-body tm-stack">
+            <h2 class="tm-h3"><%= row.event.title %></h2>
+            <% const remaining = Math.max(0, Number(row.event.capacity || 0) - Number(row.totalSold || 0)); %>
+            <% const percent = (Number(row.event.capacity || 0) > 0) ? Math.round((Number(row.totalSold || 0) / Number(row.event.capacity || 0)) * 100) : 0; %>
+            <div style="display:flex;flex-wrap:wrap;gap:8px">
+              <span class="tm-badge tm-badge-success">ขายแล้ว: <%= row.totalSold %></span>
+              <span class="tm-badge tm-badge-primary">ความจุ: <%= row.event.capacity %></span>
+              <span class="tm-badge tm-badge-primary">รายได้: <%= row.totalRevenue %> ฿</span>
+              <span class="tm-badge <%= remaining <= 0 ? 'tm-badge-danger' : 'tm-badge-success' %>">คงเหลือ: <%= remaining %></span>
+              <span class="tm-muted" style="font-weight:600">ซื้อไป: <%= percent %>%</span>
+            </div>
+            <div style="display:flex;flex-wrap:wrap;gap:12px">
+              <a class="tm-btn tm-btn-outline" href="/events/<%= row.event._id %>">
+                ดูหน้ารายละเอียด
+              </a>
+              <a class="tm-btn tm-btn-outline" href="/events/<%= row.event._id %>/edit">
+                แก้ไขอีเวนต์
+              </a>
+              <% if (row.orders.length > 0) { %>
+                <button type="button" class="tm-btn tm-btn-outline" data-target="orders-<%= row.event._id %>" data-count="<%= row.orders.length %>" aria-expanded="false">
+                  ดูผู้ซื้อ (<%= row.orders.length %>)
+                </button>
+              <% } %>
+            </div>
+            <% if (row.orders.length === 0) { %>
+              <div class="tm-notice">ยังไม่มีคำสั่งซื้อ</div>
+            <% } else { %>
+              <div id="orders-<%= row.event._id %>" class="tm-stack" style="display:none">
+                <div class="tm-grid tm-grid-md-2 tm-grid-lg-3">
+                  <% row.orders.forEach(o => { %>
+                    <article class="tm-card">
+                      <div class="tm-card-body tm-stack" style="font-size:14px">
+                        <p><strong>ผู้ซื้อ:</strong> <%= (o.userId?.name) || 'User' %></p>
+                        <p><strong>อีเมล:</strong> <%= (o.userId?.email) || '-' %></p>
+                        <p><strong>จำนวน:</strong> <%= o.quantity %> · <strong>ยอดชำระ:</strong> <%= o.amount %> ฿</p>
+                        <p><strong>เวลา:</strong> <%= new Date(o.paidAt || o.createdAt).toLocaleString('th-TH') %></p>
+                      </div>
+                    </article>
+                  <% }) %>
+                </div>
+              </div>
+            <% } %>
+          </div>
+        </section>
+      <% }) %>
+    </main>
+    <script>
+      document.addEventListener('DOMContentLoaded', function(){
+        var toggles = document.querySelectorAll('button[data-target]');
+        toggles.forEach(function(btn){
+          btn.addEventListener('click', function(){
+            var id = btn.getAttribute('data-target');
+            var el = document.getElementById(id);
+            if(!el) return;
+            var isHidden = (el.style.display === 'none' || el.style.display === '');
+            el.style.display = isHidden ? 'block' : 'none';
+            btn.setAttribute('aria-expanded', isHidden ? 'true' : 'false');
+            var count = btn.getAttribute('data-count') || '';
+            btn.textContent = isHidden ? 'ซ่อนผู้ซื้อ' : ('ดูผู้ซื้อ' + (count ? ' (' + count + ')' : ''));
+          });
+        });
+      });
+    </script>
+<%- include('./partials/footer') %>

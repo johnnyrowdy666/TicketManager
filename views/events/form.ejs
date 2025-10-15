@@ -1,0 +1,161 @@
+<%- include('../partials/header', { pageTitle: (event ? 'แก้ไขอีเวนต์' : 'สร้างอีเวนต์ใหม่') }) %>
+    <main class="tm-container tm-stack">
+      <section class="tm-card">
+        <div class="tm-card-body tm-stack">
+          <h1 class="tm-h1"><%= event ? 'แก้ไขอีเวนต์' : 'สร้างอีเวนต์ใหม่' %></h1>
+          <form class="tm-stack" action="<%= action %>" method="post" enctype="multipart/form-data">
+            <label for="title" style="font-weight:600">ชื่ออีเวนต์</label>
+            <input id="title" class="tm-input" type="text" name="title" value="<%= (typeof formData !== 'undefined' && formData && formData.title) ? formData.title : (event?.title || '') %>" required autocomplete="off" />
+
+            <label for="description" style="font-weight:600">รายละเอียด</label>
+            <input id="description" class="tm-input" type="text" name="description" value="<%= (typeof formData !== 'undefined' && formData && formData.description) ? formData.description : (event?.description || '') %>" autocomplete="off" />
+
+            <% if (event && event.imageUrl) { %>
+              <div class="tm-stack">
+                <p class="tm-muted">รูปปัจจุบัน:</p>
+                <img src="<%= event.imageUrl %>" alt="Preview" style="max-width:100%;height:auto;border:1px solid var(--border);border-radius:10px" />
+              </div>
+              <label style="display:inline-flex;align-items:center;gap:8px"><input type="checkbox" name="removeImage" value="1" /> ลบรูปภาพนี้</label>
+            <% } %>
+
+            <label for="imageFile" style="font-weight:600">อัปโหลดรูปภาพ (สูงสุด 5MB)</label>
+            <input id="imageFile" class="tm-input" type="file" name="image" accept="image/*" <%= event ? '' : 'required' %> />
+            <small id="imageHint" class="tm-muted">ไฟล์รูปต้องเป็นภาพและไม่เกิน 5MB</small>
+            <div id="imageError" style="display:none;color:#c00"></div>
+
+            <label for="date" style="font-weight:600">วันที่</label>
+            <input id="date" class="tm-input" type="date" name="date" value="<%= (typeof formData !== 'undefined' && formData && formData.date) ? formData.date : (event ? new Date(event.date).toISOString().substring(0,10) : '') %>" required autocomplete="off" />
+
+            <label for="locationInput" style="font-weight:600">สถานที่</label>
+            <input id="locationInput" class="tm-input" type="text" name="location" value="<%= (typeof formData !== 'undefined' && formData && formData.location) ? formData.location : (event?.location || '') %>" required autocomplete="off" />
+            <input type="hidden" name="lat" value="<%= (typeof formData !== 'undefined' && formData && formData.lat) ? formData.lat : (typeof event?.lat !== 'undefined' ? event.lat : '') %>">
+            <input type="hidden" name="lng" value="<%= (typeof formData !== 'undefined' && formData && formData.lng) ? formData.lng : (typeof event?.lng !== 'undefined' ? event.lng : '') %>">
+            <% if (typeof mapsApiKey !== 'undefined' && mapsApiKey) { %>
+              <div id="map" style="height:300px;border:1px solid var(--border);border-radius:10px;margin:8px 0"></div>
+            <% } else { %>
+              <div class="tm-notice">ไม่พบค่า Google Maps API Key จึงไม่สามารถแสดงแผนที่ได้</div>
+            <% } %>
+
+            <label for="capacity" style="font-weight:600">จำนวนบัตร</label>
+            <input id="capacity" class="tm-input" type="number" min="0" name="capacity" value="<%= (typeof formData !== 'undefined' && formData && formData.capacity) ? formData.capacity : (event?.capacity || 0) %>" required autocomplete="off" />
+
+            <label for="price" style="font-weight:600">ราคา (บาท)</label>
+            <input id="price" class="tm-input" type="number" min="0" name="price" value="<%= (typeof formData !== 'undefined' && formData && formData.price) ? formData.price : (event?.price || 0) %>" required autocomplete="off" />
+
+            <div style="display:flex;gap:12px;flex-wrap:wrap;padding-top:8px">
+              <button class="tm-btn tm-btn-primary" type="submit">
+                <svg class="tm-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 6v12"/><path d="M6 12h12"/></svg>
+                บันทึก
+              </button>
+              <a class="tm-btn tm-btn-outline" href="/events/manage">
+                กลับไปหน้าจัดการ
+              </a>
+            </div>
+          </form>
+        </div>
+      </section>
+      <script>
+        (function(){
+          // Client-side file validation for image
+          const imageInput = document.getElementById('imageFile');
+          const imageError = document.getElementById('imageError');
+          const MAX_SIZE = 5 * 1024 * 1024; // 5MB
+          if (imageInput) {
+            imageInput.addEventListener('change', function(){
+              if (!imageError) return;
+              imageError.style.display = 'none';
+              imageError.textContent = '';
+              const file = imageInput.files && imageInput.files[0];
+              if (!file) return;
+              if (!file.type || !file.type.startsWith('image/')) {
+                imageError.textContent = 'ไฟล์ที่เลือกไม่ใช่รูปภาพ';
+                imageError.style.display = 'block';
+                imageInput.value = '';
+                return;
+              }
+              if (file.size > MAX_SIZE) {
+                imageError.textContent = 'ไฟล์ใหญ่เกิน 5MB กรุณาเลือกไฟล์ที่เล็กกว่า';
+                imageError.style.display = 'block';
+                imageInput.value = '';
+              }
+            });
+          }
+        })();
+      </script>
+      <% if (typeof mapsApiKey !== 'undefined' && mapsApiKey) { %>
+        <script src="https://maps.googleapis.com/maps/api/js?key=<%= mapsApiKey %>&libraries=places"></script>
+        <script>
+          (function(){
+            const locInput = document.getElementById('locationInput');
+            const latInput = document.querySelector('input[name="lat"]');
+            const lngInput = document.querySelector('input[name="lng"]');
+            const defaultPos = {
+              lat: Number(latInput.value || 13.7563),
+              lng: Number(lngInput.value || 100.5018)
+            };
+            const map = new google.maps.Map(document.getElementById('map'), { center: defaultPos, zoom: 13 });
+            const marker = new google.maps.Marker({ position: defaultPos, map, draggable: true });
+
+            // Update when marker dragged
+            marker.addListener('dragend', () => {
+              const pos = marker.getPosition();
+              latInput.value = pos.lat();
+              lngInput.value = pos.lng();
+            });
+
+            // Places Autocomplete
+            const ac = new google.maps.places.Autocomplete(locInput, { fields: ['formatted_address','geometry','name'] });
+            ac.addListener('place_changed', () => {
+              const place = ac.getPlace();
+              const addr = place.formatted_address || place.name || locInput.value;
+              locInput.value = addr;
+              if (place.geometry && place.geometry.location) {
+                const pos = place.geometry.location;
+                const lat = pos.lat();
+                const lng = pos.lng();
+                latInput.value = lat;
+                lngInput.value = lng;
+                const newPos = { lat, lng };
+                marker.setPosition(newPos);
+                map.setCenter(newPos);
+                map.setZoom(15);
+              }
+            });
+
+            // Click to set marker
+            map.addListener('click', (e) => {
+              marker.setPosition(e.latLng);
+              latInput.value = e.latLng.lat();
+              lngInput.value = e.latLng.lng();
+            });
+
+            // Geocode when typing (blur / Enter)
+            const geocoder = new google.maps.Geocoder();
+            function geocodeFromInput(){
+              const value = (locInput.value || '').trim();
+              if (!value) return;
+              geocoder.geocode({ address: value }, (results, status) => {
+                if (status === 'OK' && results && results[0] && results[0].geometry) {
+                  const loc = results[0].geometry.location;
+                  const lat = loc.lat();
+                  const lng = loc.lng();
+                  latInput.value = lat;
+                  lngInput.value = lng;
+                  const pos = { lat, lng };
+                  marker.setPosition(pos);
+                  map.setCenter(pos);
+                  map.setZoom(15);
+                  const addr = results[0].formatted_address || value;
+                  locInput.value = addr;
+                }
+              });
+            }
+            locInput.addEventListener('blur', geocodeFromInput);
+            locInput.addEventListener('keydown', (e) => {
+              if (e.key === 'Enter') { e.preventDefault(); geocodeFromInput(); }
+            });
+          })();
+        </script>
+      <% } %>
+    </main>
+<%- include('../partials/footer') %>

@@ -1,0 +1,168 @@
+<%- include('../partials/header', { pageTitle: 'สมัครสมาชิก' }) %>
+    <!-- Toast Container -->
+    <%- include('../partials/toast') %>
+    
+    <main class="auth-main">
+      <div class="tm-container tm-stack" style="max-width: 700px;">
+        <!-- Header -->
+        <div class="tm-center tm-stack">
+          <div class="tm-circle" style="background: var(--success); margin: 0 auto 1rem;">
+            <svg class="tm-icon" style="color:#fff;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"></path>
+            </svg>
+          </div>
+          <h1 class="tm-h1">สมัครสมาชิก</h1>
+          <p class="tm-muted">เริ่มต้นใช้งาน TicketManager วันนี้</p>
+        </div>
+
+        <!-- Register Form -->
+        <div class="tm-card">
+          <div class="tm-card-body tm-stack">
+            <form action="/register" method="post" class="tm-stack">
+              <!-- Name Field -->
+              <div class="tm-stack">
+                <label for="name">ชื่อ-นามสกุล</label>
+                <div class="tm-field">
+                  <span class="tm-input-icon">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                    </svg>
+                  </span>
+                  <input 
+                    id="name"
+                    type="text" 
+                    name="name" 
+                    required 
+                    autocomplete="name" 
+                    class="tm-input"
+                    style="padding-left: 2.25rem;"
+                    placeholder="กรอกชื่อ-นามสกุลของคุณ"
+                  />
+                </div>
+              </div>
+
+              <!-- Email Field -->
+              <div class="tm-stack">
+                <label for="email">อีเมล</label>
+                <div class="tm-field">
+                  <span class="tm-input-icon">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207"></path>
+                    </svg>
+                  </span>
+                  <input 
+                    id="email"
+                    type="email" 
+                    name="email" 
+                    required 
+                    autocomplete="email" 
+                    class="tm-input"
+                    style="padding-left: 2.25rem;"
+                    placeholder="กรอกอีเมลของคุณ"
+                  />
+                </div>
+              </div>
+
+              <!-- Password Field -->
+              <div class="tm-stack">
+                <label for="password">รหัสผ่าน</label>
+                <div class="tm-field">
+                  <span class="tm-input-icon">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+                    </svg>
+                  </span>
+                  <input 
+                    id="password"
+                    type="password" 
+                    name="password" 
+                    required 
+                    autocomplete="new-password" 
+                    class="tm-input"
+                    style="padding-left: 2.25rem;"
+                    placeholder="สร้างรหัสผ่านที่ปลอดภัย"
+                  />
+                </div>
+                <p class="tm-muted" style="font-size: 12px;">รหัสผ่านควรมีความยาวอย่างน้อย 8 ตัวอักษร</p>
+              </div>
+
+              <!-- Role Field -->
+              <div class="tm-stack">
+                <label for="role">บทบาท</label>
+                <div class="tm-field">
+                  <span class="tm-input-icon">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                    </svg>
+                  </span>
+                  <select 
+                    id="role"
+                    name="role" 
+                    required 
+                    class="tm-input"
+                    style="padding-left: 2.25rem; appearance: none;"
+                  >
+                    <option value="">เลือกบทบาทของคุณ</option>
+                    <option value="attendee">ผู้เข้าร่วม (Attendee)</option>
+                    <option value="organizer">ผู้จัดงาน (Organizer)</option>
+                  </select>
+                  <span class="tm-input-icon" style="left:auto; right:12px; transform: translateY(-50%);">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                    </svg>
+                  </span>
+                </div>
+                <div class="tm-muted" style="font-size: 12px;">
+                  <p><strong>ผู้เข้าร่วม:</strong> สำหรับการซื้อตั๋วและเข้าร่วมอีเวนต์</p>
+                  <p><strong>ผู้จัดงาน:</strong> สำหรับการสร้างและจัดการอีเวนต์</p>
+                </div>
+              </div>
+
+              <!-- Terms and Conditions -->
+              <div style="display:flex; align-items:flex-start; gap:12px;">
+                <input id="terms" name="terms" type="checkbox" required />
+                <div class="tm-muted" style="font-size: 14px;">
+                  <label for="terms" style="color: var(--text);">
+                    ฉันยอมรับ 
+                    <a href="#" style="color: var(--success);">ข้อกำหนดการใช้งาน</a> 
+                    และ 
+                    <a href="#" style="color: var(--success);">นโยบายความเป็นส่วนตัว</a>
+                  </label>
+                </div>
+              </div>
+
+              <!-- Submit Button -->
+              <button type="submit" class="tm-btn tm-btn-primary">
+                <svg class="tm-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"></path>
+                </svg>
+                สมัครสมาชิก
+              </button>
+            </form>
+
+            <!-- Divider -->
+            <hr style="border:0; border-top:1px solid rgba(0,0,0,0.08);" />
+
+            <!-- Login Link -->
+            <div class="tm-center">
+              <p class="tm-muted">
+                มีบัญชีแล้ว? 
+                <a href="/login" style="color: var(--success);">เข้าสู่ระบบที่นี่</a>
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Back to Home -->
+        <div class="tm-center" style="margin-top: 1rem;">
+          <a href="/" style="display:inline-flex; align-items:center; gap:8px; color: var(--text-muted);">
+            <svg class="tm-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+            </svg>
+            กลับสู่หน้าหลัก
+          </a>
+        </div>
+      </div>
+    </main>
+
+<%- include('../partials/footer') %>

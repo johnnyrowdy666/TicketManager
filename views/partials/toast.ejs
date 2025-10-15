@@ -1,0 +1,33 @@
+<div id="toast-container" class="toast-container" aria-live="polite" aria-atomic="true"></div>
+<script>
+  (function(){
+    window.showToast = function(message, type){
+      try {
+        var container = document.getElementById('toast-container');
+        if (!container) return;
+        var toast = document.createElement('div');
+        toast.className = 'toast ' + (type || 'info');
+        toast.setAttribute('role','status');
+        var msg = document.createElement('span');
+        msg.className = 'toast-message';
+        msg.textContent = String(message || '');
+        var btn = document.createElement('button');
+        btn.className = 'toast-close';
+        btn.setAttribute('aria-label','ปิด');
+        btn.innerHTML = '&times;';
+        toast.appendChild(msg);
+        toast.appendChild(btn);
+        container.appendChild(toast);
+        function close(){
+          toast.classList.add('hide');
+          setTimeout(function(){ toast.remove(); }, 200);
+        }
+        btn.addEventListener('click', close);
+        setTimeout(close, 5000);
+      } catch (e) { /* noop */ }
+    };
+    <% if (flash) { %>
+      window.showToast('<%= (flash.message || '').replace(/\\/g,'\\\\').replace(/\n/g,' ').replace(/"/g,'\\"') %>', '<%= flash.type %>');
+    <% } %>
+  })();
+</script>
