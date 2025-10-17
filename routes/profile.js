@@ -1,17 +1,33 @@
 const express = require('express');
 const { ensureAuth } = require('../middleware/auth');
 const repo = require('../lib/repo');
+let QRCode = null;
+try { QRCode = require('qrcode'); } catch (e) { QRCode = null; }
 const router = express.Router();
 
 router.get('/profile', ensureAuth, async (req, res) => {
   const orders = await repo.listOrdersByUser(req.user._id);
-  // ในโหมดหน่วยความจำ ให้ map event ข้อมูลเข้ารายการ
+  // ในโหมดหน่วยความจำ ให้ map event ข้อมูลเข้ารายการ และสร้าง QR สำหรับแต่ละคำสั่งซื้อ
   const enriched = await Promise.all(
     orders.map(async (o) => {
       const eventId = (o.eventId && o.eventId._id) ? o.eventId._id : o.eventId;
       const ev = await repo.getEventById(eventId);
       const base = (typeof o.toObject === 'function') ? o.toObject() : o;
-      return { ...base, event: ev };
+      const id = String(base._id);
+      const payloadUrl = `${req.protocol}://${req.get('host')}/tickets/${id}/verify`;
+      let qrDataUrl;
+      if (QRCode && QRCode.toDataURL) {
+        try {
+          qrDataUrl = await QRCode.toDataURL(payloadUrl, { width: 180, margin: 1 });
+        } catch (_) {
+          const encoded = encodeURIComponent(payloadUrl);
+          qrDataUrl = `https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encoded}`;
+        }
+      } else {
+        const encoded = encodeURIComponent(payloadUrl);
+        qrDataUrl = `https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encoded}`;
+      }
+      return { ...base, event: ev, payloadUrl, qrDataUrl };
     })
   );
   res.render('profile', { orders: enriched });

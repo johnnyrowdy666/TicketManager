@@ -69,11 +69,19 @@
                     <%= e.price === 0 ? 'ฟรี' : e.price + ' ฿' %>
                   </span>
                 </div>
+                <% 
+                  // คำนวณสถานะบัตรหมดจากจำนวนคงเหลือ
+                  const sold = Number(e.ticketsSold || 0);
+                  const cap = Number(e.capacity || 0);
+                  const remaining = cap - sold;
+                  const isSoldOut = remaining <= 0;
+                %>
                 <!-- Status Badge -->
-                <% if (e.status === 'sold_out') { %>
+                <% if (isSoldOut) { %>
                   <div style="position:absolute; top:12px; left:12px;">
-                    <span class="tm-badge tm-badge-danger">
-                      หมดแล้ว
+                    <span class="tm-badge tm-badge-danger" aria-label="บัตรหมด">
+                      <svg class="tm-icon-sm" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                      บัตรหมด
                     </span>
                   </div>
                 <% } %>
@@ -121,12 +129,12 @@
                 
                 <!-- Action Button -->
                 <div>
-                  <% if (e.status === 'sold_out') { %>
-                    <button class="tm-btn tm-btn-disabled" style="width:100%" disabled>
+                  <% if (isSoldOut) { %>
+                    <button class="tm-btn tm-btn-disabled" style="width:100%" disabled aria-label="บัตรหมด">
                       <svg class="tm-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                       </svg>
-                      หมดแล้ว
+                      บัตรหมด
                     </button>
                   <% } else { %>
                     <a class="tm-btn tm-btn-primary" style="width:100%" href="/events/<%= e._id %>">
@@ -159,7 +167,7 @@
             <% } %>
           </p>
           <% if (currentUser && currentUser.role === 'organizer') { %>
-            <a class="tm-btn tm-btn-primary" href="/events/form">
+            <a class="tm-btn tm-btn-primary" href="/events/new">
               <svg class="tm-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
               </svg>

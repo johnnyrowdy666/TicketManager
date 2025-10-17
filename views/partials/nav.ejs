@@ -4,7 +4,7 @@
       <button id="tm-nav-toggle" class="tm-nav-toggle" type="button" aria-label="เปิดเมนู" aria-expanded="false" aria-controls="tm-nav-menu">
         <svg class="tm-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18"/><path d="M3 12h18"/><path d="M3 18h18"/></svg>
       </button>
-      <a class="tm-brand" href="/">Event Ticketing</a>
+      <a class="tm-brand" href="/">Eเวร Ticket</a>
     </div>
     <form action="/" method="get" class="tm-search">
       <input class="tm-input" type="text" name="q" value="<%= typeof q !== 'undefined' ? q : '' %>" placeholder="ค้นหาอีเวนต์..." autocomplete="off">
@@ -15,9 +15,11 @@
     </form>
     <nav id="tm-nav-menu" class="tm-nav-menu">
       <% if (currentUser) { %>
-        <% if (currentUser.role === 'organizer') { %>
-          <a class="tm-link" href="/events/manage">จัดการอีเวนต์</a>
-          <a class="tm-link" href="/dashboard">Dashboard</a>
+        <% if (currentUser.role !== 'organizer') { %>
+          <a class="tm-badge tm-badge-primary" href="/wallet" title="เครดิตคงเหลือ" aria-label="เครดิตคงเหลือ">
+            <svg class="tm-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 7H4a2 2 0 00-2 2v6a2 2 0 002 2h16a2 2 0 002-2V9a2 2 0 00-2-2z"/><path d="M16 15a2 2 0 100-4 2 2 0 000 4z"/></svg>
+            เครดิต: <%= (Number(currentUser.creditBalanceCents || 0) / 100).toLocaleString('th-TH') %> ฿
+          </a>
         <% } %>
 
         <div class="tm-user-dropdown">
@@ -26,6 +28,26 @@
             <span class="tm-caret" aria-hidden="true"></span>
           </button>
           <div id="tm-profile-menu" class="tm-dropdown" role="menu">
+            <% if (currentUser.role === 'organizer') { %>
+              <a class="tm-dropdown-item" href="/scan" role="menuitem" title="สแกนตรวจตั๋ว" aria-label="สแกนตรวจตั๋ว">
+                <svg class="tm-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M3 7V5a2 2 0 012-2h2"/>
+                  <path d="M21 7V5a2 2 0 00-2-2h-2"/>
+                  <path d="M3 17v2a2 2 0 002 2h2"/>
+                  <path d="M21 17v2a2 2 0 01-2 2h-2"/>
+                </svg>
+                สแกนตรวจตั๋ว
+              </a>
+              <a class="tm-dropdown-item" href="/dashboard" role="menuitem">
+                <svg class="tm-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3h7v7H3z"/><path d="M14 3h7v7h-7z"/><path d="M14 14h7v7h-7z"/><path d="M3 14h7v7H3z"/></svg>
+                แดชบอร์ด
+              </a>
+              <a class="tm-dropdown-item" href="/events/manage" role="menuitem">
+                <svg class="tm-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 6v6m0 0v6m0-6h6m-6 0H6"/></svg>
+                จัดการอีเวนต์
+              </a>
+              <div class="tm-dropdown-divider"></div>
+            <% } %>
             <a class="tm-dropdown-item" href="/profile" role="menuitem">
               <svg class="tm-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 7a4 4 0 11-8 0 4 4 0 018 0z"/><path d="M12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
               หน้าโปรไฟล์

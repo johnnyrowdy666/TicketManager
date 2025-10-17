@@ -33,47 +33,53 @@
             <% } %>
             <div class="tm-stack">
               <% orders.forEach(o => { %>
-                <article class="tm-card" style="margin:0">
-                  <div class="tm-card-body tm-stack" style="font-size:14px">
-                    <h3 class="tm-h3"><%= o.event?.title || 'Event' %></h3>
-                    <p><strong>จำนวน:</strong> <%= Number(o.quantity || 1) %> · <strong>ยอดชำระ:</strong> <%= Number(o.amount || 0).toLocaleString('th-TH') %> ฿</p>
-                    <% const purchaseDate = (o.paidAt || o.createdAt) ? new Date(o.paidAt || o.createdAt) : null; const purchaseValid = purchaseDate && !Number.isNaN(purchaseDate.valueOf()); %>
-                    <p><strong>วันที่ซื้อ:</strong> <%= purchaseValid ? purchaseDate.toLocaleString('th-TH') : '—' %></p>
-                    <p><strong>สถานที่:</strong> <%= o.event?.location || 'กรุณาระบุสถานที่' %></p>
-                    <% const evDate = o.event?.date ? new Date(o.event.date) : null; const evDateValid = evDate && !Number.isNaN(evDate.valueOf()); %>
-                    <p><strong>เวลา:</strong> <%= o.event?.startTime || 'กรุณาระบุเวลา' %></p>
-                    <p><strong>วัน:</strong> <%= evDateValid ? evDate.toLocaleDateString('th-TH') : 'กรุณาระบุวัน' %></p>
-                    <%
-                      const startBase = o.event?.date ? new Date(o.event.date) : null;
-                      const startValid = startBase && !Number.isNaN(startBase.valueOf());
-                      let startTs = startValid ? startBase.valueOf() : null;
-                      if (startValid && o.event?.startTime) {
-                        const parts = String(o.event.startTime).split(':');
-                        const hh = Number(parts[0] || 0);
-                        const mm = Number(parts[1] || 0);
-                        startBase.setHours(hh, mm, 0, 0);
-                        startTs = startBase.valueOf();
-                      }
-                    %>
-                    <% if (startTs) { %>
-                      <div class="tm-countdown" data-countdown-ts="<%= startTs %>">
-                        <span class="tm-badge tm-badge-primary">เหลือเวลา</span>
-                        <span class="countdown-text"></span>
-                      </div>
-                    <% } %>
-                    <p><strong>สถานะตั๋ว:</strong>
-                      <% if (o.status === 'used') { %>
-                        <span class="tm-badge tm-badge-danger">ใช้แล้ว</span>
-                        <% if (o.usedAt) { %><span class="tm-muted" style="margin-left:6px">(<%= new Date(o.usedAt).toLocaleString('th-TH') %>)</span><% } %>
-                      <% } else { %>
-                        <span class="tm-badge tm-badge-success">ยังไม่ได้ใช้</span>
+                <% const qty = Number(o.quantity || 1); %>
+                <% for (let i = 0; i < qty; i++) { %>
+                  <article class="tm-card" style="margin:0">
+                    <div class="tm-card-body tm-stack" style="font-size:14px">
+                      <h3 class="tm-h3"><%= o.event?.title || 'Event' %> · <span class="tm-muted" style="font-weight:normal">ตั๋วใบที่ <%= i + 1 %> / <%= qty %></span></h3>
+                      <% const purchaseDate = (o.paidAt || o.createdAt) ? new Date(o.paidAt || o.createdAt) : null; const purchaseValid = purchaseDate && !Number.isNaN(purchaseDate.valueOf()); %>
+                      <p><strong>วันที่ซื้อ:</strong> <%= purchaseValid ? purchaseDate.toLocaleString('th-TH') : '—' %></p>
+                      <p><strong>สถานที่:</strong> <%= o.event?.location || 'กรุณาระบุสถานที่' %></p>
+                      <% const evDate = o.event?.date ? new Date(o.event.date) : null; const evDateValid = evDate && !Number.isNaN(evDate.valueOf()); %>
+                      <p><strong>เวลา:</strong> <%= o.event?.startTime || 'กรุณาระบุเวลา' %></p>
+                      <p><strong>วัน:</strong> <%= evDateValid ? evDate.toLocaleDateString('th-TH') : 'กรุณาระบุวัน' %></p>
+                      <%
+                        const startBase = o.event?.date ? new Date(o.event.date) : null;
+                        const startValid = startBase && !Number.isNaN(startBase.valueOf());
+                        let startTs = startValid ? startBase.valueOf() : null;
+                        if (startValid && o.event?.startTime) {
+                          const parts = String(o.event.startTime).split(':');
+                          const hh = Number(parts[0] || 0);
+                          const mm = Number(parts[1] || 0);
+                          startBase.setHours(hh, mm, 0, 0);
+                          startTs = startBase.valueOf();
+                        }
+                      %>
+                      <% if (startTs) { %>
+                        <div class="tm-countdown" data-countdown-ts="<%= startTs %>">
+                          <span class="tm-badge tm-badge-primary">เหลือเวลา</span>
+                          <span class="countdown-text"></span>
+                        </div>
                       <% } %>
-                    </p>
-                    <div>
-                      <a class="tm-btn tm-btn-primary" href="/orders/<%= o._id %>">ดูรายละเอียดตั๋ว</a>
+                      <p><strong>สถานะตั๋ว:</strong>
+                        <% if (o.status === 'used') { %>
+                          <span class="tm-badge tm-badge-danger">ใช้แล้ว</span>
+                          <% if (o.usedAt) { %><span class="tm-muted" style="margin-left:6px">(<%= new Date(o.usedAt).toLocaleString('th-TH') %>)</span><% } %>
+                        <% } else { %>
+                          <span class="tm-badge tm-badge-success">ยังไม่ได้ใช้</span>
+                        <% } %>
+                      </p>
+                      <div class="tm-stack" style="align-items:center">
+                        <img src="<%= o.qrDataUrl %>" alt="QR ตรวจตั๋ว ใบที่ <%= i + 1 %> จาก <%= qty %>" width="180" height="180" style="border:1px solid var(--border);border-radius:6px;background:var(--surface)" />
+                        <p class="tm-muted" style="font-size:12px;margin:0">URL ตรวจตั๋ว: <%= o.payloadUrl %></p>
+                      </div>
+                      <div>
+                        <a class="tm-btn tm-btn-primary" href="/orders/<%= o._id %>">ดูรายละเอียดตั๋ว</a>
+                      </div>
                     </div>
-                  </div>
-                </article>
+                  </article>
+                <% } %>
               <% }) %>
             </div>
           </div>

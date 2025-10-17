@@ -1,5 +1,6 @@
 const express = require('express');
 const repo = require('../lib/repo');
+const realtime = require('../lib/realtime');
 const multer = require('multer');
 const upload = multer({
   storage: multer.memoryStorage(),
@@ -43,7 +44,18 @@ router.post('/events/:id/buy', ensureRole('attendee'), async (req, res) => {
       req.session.flash = { type: 'error', message: 'เกิดข้อผิดพลาดระหว่างการชำระเงิน' };
       return res.redirect(`/events/${req.params.id}`);
     }
-    await repo.createOrder({ userId: req.user._id, eventId: event._id, quantity, amount: amountBaht });
+    const order = await repo.createOrder({ userId: req.user._id, eventId: event._id, quantity, amount: amountBaht });
+    // Broadcast real-time creation for organizer dashboards
+    try {
+      const paidAt = order && (order.paidAt || order.createdAt) ? (order.paidAt || order.createdAt) : new Date();
+      realtime.broadcast('order_created', {
+        orderId: (order && (order._id || order.id)) ? (order._id || order.id) : undefined,
+        eventId: event._id,
+        quantity,
+        amount: amountBaht,
+        paidAt,
+      });
+    } catch (_) {}
     req.session.flash = { type: 'success', message: 'ซื้อบัตรสำเร็จ' };
     res.redirect('/profile');
   } catch (err) {

@@ -1,31 +1,150 @@
-<%- include('./partials/header', { pageTitle: 'Dashboard' }) %>
-    <main class="tm-container tm-stack">
-      <h1 class="tm-h1">Dashboard (รายชื่อผู้ซื้อบัตร)</h1>
-      <% rows.forEach(row => { %>
-        <section class="tm-card">
-          <div class="tm-card-body tm-stack">
-            <h2 class="tm-h3"><%= row.event.title %></h2>
-            <% const remaining = Math.max(0, Number(row.event.capacity || 0) - Number(row.totalSold || 0)); %>
-            <% const percent = (Number(row.event.capacity || 0) > 0) ? Math.round((Number(row.totalSold || 0) / Number(row.event.capacity || 0)) * 100) : 0; %>
-            <div style="display:flex;flex-wrap:wrap;gap:8px">
-              <span class="tm-badge tm-badge-success">ขายแล้ว: <%= row.totalSold %></span>
-              <span class="tm-badge tm-badge-primary">ความจุ: <%= row.event.capacity %></span>
-              <span class="tm-badge tm-badge-primary">รายได้: <%= row.totalRevenue %> ฿</span>
-              <span class="tm-badge <%= remaining <= 0 ? 'tm-badge-danger' : 'tm-badge-success' %>">คงเหลือ: <%= remaining %></span>
-              <span class="tm-muted" style="font-weight:600">ซื้อไป: <%= percent %>%</span>
+<%- include('./partials/header', { pageTitle: 'แดชบอร์ด' }) %>
+  <main class="tm-container tm-stack">
+    <div class="tm-row" style="align-items:flex-end">
+      <div>
+        <h1 class="tm-h1">แดชบอร์ดสรุป</h1>
+        <p class="tm-muted">ภาพรวมการขายและกิจกรรมแบบเรียลไทม์</p>
+      </div>
+      <div style="display:flex;gap:12px">
+        <a class="tm-btn tm-btn-outline" href="/events/manage">จัดการอีเวนต์</a>
+        <a class="tm-btn tm-btn-primary" href="/events/new">สร้างอีเวนต์ใหม่</a>
+      </div>
+    </div>
+
+    <!-- KPI Cards -->
+    <section class="tm-grid tm-grid-md-2 tm-grid-lg-4">
+      <article class="tm-card">
+        <div class="tm-card-body tm-stack">
+          <div style="display:flex;align-items:center;gap:8px">
+            <svg class="tm-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="color:var(--success)"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-3.314 0-6 2.239-6 5s2.686 5 6 5 6-2.239 6-5-2.686-5-6-5z"/></svg>
+            <span class="tm-muted">มูลค่าขายรวม</span>
+          </div>
+          <div class="tm-display" id="kpi-revenue"><%= Number(summary.totalRevenue || 0).toLocaleString('th-TH') %> ฿</div>
+        </div>
+      </article>
+      <article class="tm-card">
+        <div class="tm-card-body tm-stack">
+          <div style="display:flex;align-items:center;gap:8px">
+            <svg class="tm-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="color:#3b82f6"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9v6a2 2 0 002 2h10a2 2 0 002-2v-1a2 2 0 000-4v-1a2 2 0 00-2-2H5a2 2 0 00-2 2z"/></svg>
+            <span class="tm-muted">จำนวนตั๋วที่ขาย</span>
+          </div>
+          <div class="tm-display" id="kpi-tickets"><%= Number(summary.totalSoldTickets || 0).toLocaleString('th-TH') %></div>
+        </div>
+      </article>
+      <article class="tm-card">
+        <div class="tm-card-body tm-stack">
+          <div style="display:flex;align-items:center;gap:8px">
+            <svg class="tm-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="color:#10b981"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5V4H2v16h5"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 10h5M7 14h8"/></svg>
+            <span class="tm-muted">ผู้ใช้งานที่ซื้อ</span>
+          </div>
+          <div class="tm-display" id="kpi-users"><%= Number(summary.activeUsersCount || 0).toLocaleString('th-TH') %></div>
+        </div>
+      </article>
+      <article class="tm-card">
+        <div class="tm-card-body tm-stack">
+          <div style="display:flex;align-items:center;gap:8px">
+            <svg class="tm-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="color:#f59e0b"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v8m4-4H8"/></svg>
+            <span class="tm-muted">ชำระเงินรอดำเนินการ</span>
+          </div>
+          <div class="tm-display" id="kpi-pending"><%= (pendingPayments && pendingPayments.length) ? pendingPayments.length : 0 %></div>
+          <p class="tm-muted" style="font-size:12px">ระบบตัดเครดิตทันที จึงไม่มีรายการค้าง</p>
+        </div>
+      </article>
+    </section>
+
+    <!-- Trends -->
+    <section class="tm-card">
+      <div class="tm-card-body tm-stack">
+        <h2 class="tm-h3">แนวโน้มการขาย</h2>
+        <div class="tm-grid tm-grid-md-2">
+          <div class="tm-stack">
+            <h3 class="tm-h4">รายวัน (7 วัน)</h3>
+            <canvas id="chart-daily" width="600" height="220" style="max-width:100%"></canvas>
+          </div>
+          <div class="tm-stack">
+            <h3 class="tm-h4">รายสัปดาห์ (8 สัปดาห์)</h3>
+            <canvas id="chart-weekly" width="600" height="220" style="max-width:100%"></canvas>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Sales by Ticket Type / Event -->
+    <section class="tm-card">
+      <div class="tm-card-body tm-stack">
+        <h2 class="tm-h3">สถิติการขายตามประเภทตั๋ว/อีเวนต์</h2>
+        <div class="tm-stack" style="gap:12px">
+          <% (typeStats || []).forEach(stat => { %>
+            <div class="tm-stack">
+              <div style="display:flex;align-items:center;justify-content:space-between">
+                <strong><%= stat.name %></strong>
+                <span class="tm-muted" style="font-size:12px">ขายแล้ว <span id="type-sold-<%= stat.name %>"><%= stat.sold %></span> · รายได้ <span id="type-rev-<%= stat.name %>"><%= Number(stat.revenue || 0).toLocaleString('th-TH') %></span> ฿</span>
+              </div>
+              <% const totalCap = Number(stat.capacity || 0); const pct = totalCap > 0 ? Math.round((Number(stat.sold || 0) / totalCap) * 100) : 0; %>
+              <div class="tm-progress" aria-label="สัดส่วนการขาย">
+                <div class="tm-progress-bar" style="width:<%= pct %>%"></div>
+              </div>
             </div>
-            <div style="display:flex;flex-wrap:wrap;gap:12px">
-              <a class="tm-btn tm-btn-outline" href="/events/<%= row.event._id %>">
-                ดูหน้ารายละเอียด
-              </a>
-              <a class="tm-btn tm-btn-outline" href="/events/<%= row.event._id %>/edit">
-                แก้ไขอีเวนต์
-              </a>
-              <% if (row.orders.length > 0) { %>
-                <button type="button" class="tm-btn tm-btn-outline" data-target="orders-<%= row.event._id %>" data-count="<%= row.orders.length %>" aria-expanded="false">
-                  ดูผู้ซื้อ (<%= row.orders.length %>)
-                </button>
-              <% } %>
+          <% }) %>
+        </div>
+      </div>
+    </section>
+
+    <!-- Top Selling -->
+    <section class="tm-card">
+      <div class="tm-card-body tm-stack">
+        <h2 class="tm-h3">ตั๋วที่ขายดีที่สุด</h2>
+        <% if ((topSelling || []).length === 0) { %>
+          <div class="tm-notice">ยังไม่มีข้อมูลการขาย</div>
+        <% } else { %>
+          <div class="tm-grid tm-grid-md-2 tm-grid-lg-3">
+            <% topSelling.forEach(item => { %>
+              <% const remaining = Math.max(0, Number(item.capacity || 0) - Number(item.sold || 0)); %>
+              <% const pct = (Number(item.capacity || 0) > 0) ? Math.round((Number(item.sold || 0) / Number(item.capacity || 0)) * 100) : 0; %>
+              <article class="tm-card">
+                <div class="tm-card-body tm-stack">
+                  <h3 class="tm-h4" style="margin:0"><%= item.title %></h3>
+                  <div style="display:flex;gap:8px;flex-wrap:wrap">
+                    <span class="tm-badge tm-badge-success">ขายแล้ว: <span id="top-sold-<%= item.eventId %>"><%= item.sold %></span></span>
+                    <span class="tm-badge tm-badge-primary">รายได้: <span id="top-rev-<%= item.eventId %>"><%= Number(item.revenue || 0).toLocaleString('th-TH') %></span> ฿</span>
+                    <span class="tm-badge <%= remaining <= 0 ? 'tm-badge-danger' : 'tm-badge-success' %>">คงเหลือ: <span id="top-rem-<%= item.eventId %>"><%= remaining %></span></span>
+                  </div>
+                  <div class="tm-progress"><div class="tm-progress-bar" style="width:<%= pct %>%"></div></div>
+                </div>
+              </article>
+            <% }) %>
+          </div>
+        <% } %>
+      </div>
+    </section>
+
+    <!-- Events & buyers (เดิม ปรับดีไซน์เล็กน้อย) -->
+    <section class="tm-stack">
+      <h2 class="tm-h3">อีเวนต์ของฉัน</h2>
+      <% rows.forEach(row => { %>
+        <% const remaining = Math.max(0, Number(row.event.capacity || 0) - Number(row.totalSold || 0)); %>
+        <% const percent = (Number(row.event.capacity || 0) > 0) ? Math.round((Number(row.totalSold || 0) / Number(row.event.capacity || 0)) * 100) : 0; %>
+        <article class="tm-card">
+          <div class="tm-card-body tm-stack">
+            <div class="tm-row" style="align-items:flex-start">
+              <div class="tm-stack" style="flex:1">
+                <h3 class="tm-h3" style="margin:0"><%= row.event.title %></h3>
+                <div style="display:flex;flex-wrap:wrap;gap:8px">
+                  <span class="tm-badge tm-badge-success">ขายแล้ว: <span id="event-sold-<%= row.event._id %>"><%= row.totalSold %></span></span>
+                  <span class="tm-badge tm-badge-primary">รายได้: <span id="event-rev-<%= row.event._id %>"><%= Number(row.totalRevenue || 0).toLocaleString('th-TH') %></span> ฿</span>
+                  <span class="tm-badge <%= remaining <= 0 ? 'tm-badge-danger' : 'tm-badge-success' %>">คงเหลือ: <span id="event-rem-<%= row.event._id %>"><%= remaining %></span></span>
+                </div>
+                <div class="tm-progress" aria-label="ความคืบหน้าการขาย"><div class="tm-progress-bar" style="width:<%= percent %>%"></div></div>
+              </div>
+              <div class="tm-stack">
+                <div style="display:flex;gap:12px;flex-wrap:wrap">
+                  <a class="tm-btn tm-btn-outline" href="/events/<%= row.event._id %>">ดูหน้ารายละเอียด</a>
+                  <a class="tm-btn tm-btn-outline" href="/events/<%= row.event._id %>/edit">แก้ไขอีเวนต์</a>
+                  <% if (row.orders.length > 0) { %>
+                    <button type="button" class="tm-btn tm-btn-outline" data-target="orders-<%= row.event._id %>" data-count="<%= row.orders.length %>" aria-expanded="false">ดูผู้ซื้อ (<%= row.orders.length %>)</button>
+                  <% } %>
+                </div>
+              </div>
             </div>
             <% if (row.orders.length === 0) { %>
               <div class="tm-notice">ยังไม่มีคำสั่งซื้อ</div>
@@ -37,7 +156,7 @@
                       <div class="tm-card-body tm-stack" style="font-size:14px">
                         <p><strong>ผู้ซื้อ:</strong> <%= (o.userId?.name) || 'User' %></p>
                         <p><strong>อีเมล:</strong> <%= (o.userId?.email) || '-' %></p>
-                        <p><strong>จำนวน:</strong> <%= o.quantity %> · <strong>ยอดชำระ:</strong> <%= o.amount %> ฿</p>
+                        <p><strong>จำนวน:</strong> <%= o.quantity %> · <strong>ยอดชำระ:</strong> <%= Number(o.amount || 0).toLocaleString('th-TH') %> ฿</p>
                         <p><strong>เวลา:</strong> <%= new Date(o.paidAt || o.createdAt).toLocaleString('th-TH') %></p>
                       </div>
                     </article>
@@ -46,24 +165,142 @@
               </div>
             <% } %>
           </div>
-        </section>
+        </article>
       <% }) %>
-    </main>
-    <script>
-      document.addEventListener('DOMContentLoaded', function(){
-        var toggles = document.querySelectorAll('button[data-target]');
-        toggles.forEach(function(btn){
-          btn.addEventListener('click', function(){
-            var id = btn.getAttribute('data-target');
-            var el = document.getElementById(id);
-            if(!el) return;
-            var isHidden = (el.style.display === 'none' || el.style.display === '');
-            el.style.display = isHidden ? 'block' : 'none';
-            btn.setAttribute('aria-expanded', isHidden ? 'true' : 'false');
-            var count = btn.getAttribute('data-count') || '';
-            btn.textContent = isHidden ? 'ซ่อนผู้ซื้อ' : ('ดูผู้ซื้อ' + (count ? ' (' + count + ')' : ''));
-          });
+    </section>
+  </main>
+  <script>
+    // Toggle buyers list
+    document.addEventListener('DOMContentLoaded', function(){
+      var toggles = document.querySelectorAll('button[data-target]');
+      toggles.forEach(function(btn){
+        btn.addEventListener('click', function(){
+          var id = btn.getAttribute('data-target');
+          var el = document.getElementById(id);
+          if(!el) return;
+          var isHidden = (el.style.display === 'none' || el.style.display === '');
+          el.style.display = isHidden ? 'block' : 'none';
+          btn.setAttribute('aria-expanded', isHidden ? 'true' : 'false');
+          var count = btn.getAttribute('data-count') || '';
+          btn.textContent = isHidden ? 'ซ่อนผู้ซื้อ' : ('ดูผู้ซื้อ' + (count ? ' (' + count + ')' : ''));
         });
       });
-    </script>
+    });
+
+    // Simple chart renderers (no external libs)
+    function drawLineChart(canvasId, labels, series, color){
+      try {
+        var c = document.getElementById(canvasId);
+        if (!c) return;
+        var ctx = c.getContext('2d');
+        var W = c.width, H = c.height;
+        ctx.clearRect(0,0,W,H);
+        var maxVal = Math.max.apply(null, series.concat([1]));
+        var pad = 24; // padding
+        // axes
+        ctx.strokeStyle = '#e5e7eb';
+        ctx.beginPath();
+        ctx.moveTo(pad, H - pad);
+        ctx.lineTo(W - pad, H - pad);
+        ctx.moveTo(pad, pad);
+        ctx.lineTo(pad, H - pad);
+        ctx.stroke();
+        // line
+        ctx.strokeStyle = color || '#3b82f6';
+        ctx.lineWidth = 2;
+        var stepX = (W - pad*2) / Math.max(1, series.length - 1);
+        ctx.beginPath();
+        for (var i=0;i<series.length;i++){
+          var x = pad + i*stepX;
+          var y = pad + (H - pad*2) * (1 - (series[i]/maxVal));
+          if (i === 0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
+        }
+        ctx.stroke();
+        // labels (bottom)
+        ctx.fillStyle = '#6b7280';
+        ctx.font = '12px sans-serif';
+        var labelStep = Math.ceil(labels.length / 6);
+        for (var j=0;j<labels.length;j+=labelStep){
+          var lx = pad + j*stepX;
+          ctx.fillText(labels[j], lx-10, H-6);
+        }
+      } catch(e){}
+    }
+    function drawBarChart(canvasId, labels, series, color){
+      try {
+        var c = document.getElementById(canvasId);
+        if (!c) return;
+        var ctx = c.getContext('2d');
+        var W = c.width, H = c.height;
+        ctx.clearRect(0,0,W,H);
+        var maxVal = Math.max.apply(null, series.concat([1]));
+        var pad = 24;
+        var barW = (W - pad*2) / series.length * 0.6;
+        ctx.fillStyle = color || '#10b981';
+        for (var i=0;i<series.length;i++){
+          var x = pad + i * ((W - pad*2) / series.length) + ((W - pad*2) / series.length - barW)/2;
+          var h = (H - pad*2) * (series[i]/maxVal);
+          var y = H - pad - h;
+          ctx.fillRect(x, y, barW, h);
+        }
+        ctx.fillStyle = '#6b7280';
+        ctx.font = '12px sans-serif';
+        var labelStep = Math.ceil(labels.length / 6);
+        for (var j=0;j<labels.length;j+=labelStep){
+          var lx = pad + j * ((W - pad*2) / series.length);
+          ctx.fillText(labels[j], lx-10, H-6);
+        }
+      } catch(e){}
+    }
+
+    // Prepare data
+    (function(){
+      try {
+        var daily = <%- JSON.stringify(daily) %>;
+        var weekly = <%- JSON.stringify(weekly) %>;
+        var dLabels = daily.map(function(d){ var dt = new Date(d.ts); return (dt.getMonth()+1)+'/'+dt.getDate(); });
+        var dTickets = daily.map(function(d){ return Number(d.tickets||0); });
+        var dRevenue = daily.map(function(d){ return Number(d.revenue||0); });
+        var wLabels = weekly.map(function(w){ var dt = new Date(w.ts); return (dt.getMonth()+1)+'/'+dt.getDate(); });
+        var wTickets = weekly.map(function(w){ return Number(w.tickets||0); });
+        var wRevenue = weekly.map(function(w){ return Number(w.revenue||0); });
+        drawLineChart('chart-daily', dLabels, dTickets, '#3b82f6');
+        drawBarChart('chart-weekly', wLabels, wRevenue, '#10b981');
+      } catch(e){}
+    })();
+
+    // Real-time updates via SSE
+    (function(){
+      try {
+        var es = new EventSource('/realtime/orders');
+        function addLocale(n){ try { return Number(n||0).toLocaleString('th-TH'); } catch(_) { return String(n||0); } }
+        es.addEventListener('order_created', function(ev){
+          try {
+            var data = JSON.parse(ev.data);
+            var qty = Number(data.quantity||0);
+            var amt = Number(data.amount||0);
+            // Update KPI
+            var kTickets = document.getElementById('kpi-tickets');
+            var kRevenue = document.getElementById('kpi-revenue');
+            if (kTickets) { var val = Number((kTickets.textContent||'0').replace(/[^0-9.-]/g,'')) + qty; kTickets.textContent = addLocale(val); }
+            if (kRevenue) { var valR = Number((kRevenue.textContent||'0').replace(/[^0-9.-]/g,'')) + amt; kRevenue.textContent = addLocale(valR) + ' ฿'; }
+            // Event level
+            var soldEl = document.getElementById('event-sold-'+data.eventId);
+            var revEl = document.getElementById('event-rev-'+data.eventId);
+            var remEl = document.getElementById('event-rem-'+data.eventId);
+            if (soldEl) { var sold = Number(soldEl.textContent||'0') + qty; soldEl.textContent = addLocale(sold); }
+            if (revEl) { var curR = Number((revEl.textContent||'0').replace(/[^0-9.-]/g,'')) + amt; revEl.textContent = addLocale(curR); }
+            if (remEl) { var rem = Number(remEl.textContent||'0') - qty; remEl.textContent = addLocale(Math.max(0, rem)); }
+            // Top selling
+            var tSoldEl = document.getElementById('top-sold-'+data.eventId);
+            var tRevEl = document.getElementById('top-rev-'+data.eventId);
+            var tRemEl = document.getElementById('top-rem-'+data.eventId);
+            if (tSoldEl) { var ts = Number(tSoldEl.textContent||'0') + qty; tSoldEl.textContent = addLocale(ts); }
+            if (tRevEl) { var tr = Number((tRevEl.textContent||'0').replace(/[^0-9.-]/g,'')) + amt; tRevEl.textContent = addLocale(tr); }
+            if (tRemEl) { var trm = Number((tRemEl.textContent||'0')) - qty; tRemEl.textContent = addLocale(Math.max(0, trm)); }
+          } catch(e){}
+        });
+      } catch(e){}
+    })();
+  </script>
 <%- include('./partials/footer') %>
